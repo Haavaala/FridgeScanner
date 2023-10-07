@@ -22,6 +22,7 @@ import { ref } from "vue";
       <h2>Scanned items:</h2>
       <div v-for="item in list" :key="item">
         <p>{{ item }}</p>
+        <!-- <p>{{expirationDate}}</p> -->
       </div>
     </div>
         <!-- Display the form for expiration date if formOpen is true -->
