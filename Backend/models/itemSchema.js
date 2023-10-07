@@ -16,6 +16,10 @@ const itemSchema = new mongoose.Schema({
     amount: {
         type: String,
         required: false
+    },
+    expirationDate: {
+        type: String,
+        required: false
     }
 })
 const Item = mongoose.model('Item', itemSchema, 'items')

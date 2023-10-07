@@ -1,7 +1,7 @@
 <script setup>
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import axios from "axios";
-import { ref } from "vue"; // Import ref from Vue
+import { ref } from "vue";
 </script>
 
 <template>
@@ -24,20 +24,31 @@ import { ref } from "vue"; // Import ref from Vue
         <p>{{ item }}</p>
       </div>
     </div>
+        <!-- Display the form for expiration date if formOpen is true -->
+    <div v-if="formOpen">
+      <h3>Enter Expiration Date</h3>
+      <form @submit.prevent="submitExpirationDate">
+        <input v-model="expirationDate" type="date" placeholder="Expiration Date">
+        <button type="submit">Submit</button>
+      </form>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   data() {
-    // Define scannerOpen as a ref
     const scannerOpen = ref(false);
+    const expirationDate = ref("");
+    const formOpen = ref(false)
 
     // Export the variables to be used by the page
     return {
       list: [],
       fineList: [{}],
-      scannerOpen, // Assign it to the component's data
+      scannerOpen, 
+      expirationDate, 
+      formOpen, 
     };
   },
 
@@ -104,37 +115,46 @@ export default {
 
     // Methods for the html elements
     onDecode(result) {
-      // When camera has decoded a barcode, log the result and add to list.
-      console.log("Camera result: " + result);
-      let data = JSON.stringify({
-        barcode: result,
-      });
-      let config = {
-        method: "post",
-        maxBodyLength: Infinity,
-        url: "http://localhost:4005/api/item/",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: data,
-      };
-      axios
-        .request(config)
-        .then((response) => {
-          console.log(JSON.stringify(response.data));
-          this.$toast.open({
-            message: "Scanned item: " + response.data.name,
-            type: "success",
-            pauseOnHover: true,
-            duration: 5000,
-            position: "top-right",
-          });
-          this.updateList();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+
+      this.formOpen = true;
+      this.scannedResult = result
     },
+
+submitExpirationDate() {
+  // When camera has decoded a barcode, log the result and add to list.
+  console.log("Camera result: " + this.scannedResult); // Use this.scannedResult
+  let data = JSON.stringify({
+    barcode: this.scannedResult, // Use this.scannedResult
+    expirationDate: this.expirationDate, // Use this.expirationDate
+  });
+  let config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: "http://localhost:4005/api/item/",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
+  axios
+    .request(config)
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      this.$toast.open({
+        message: "Scanned item: " + response.data.name,
+        type: "success",
+        pauseOnHover: true,
+        duration: 5000,
+        position: "top-right",
+      });
+      this.updateList();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+    this.formOpen = false
+},
   },
 };
+          
 </script>
